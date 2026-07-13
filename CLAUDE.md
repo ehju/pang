@@ -21,3 +21,12 @@ Minimal React 19 + Vite 8 scaffold (JavaScript, no TypeScript):
 - `public/` — static assets served as-is (favicon, icons sprite)
 
 `Solution3.slnx` and `.vs/` are Visual Studio solution artifacts alongside the Vite app; `.vs/` is git-ignored.
+
+## Documentation
+
+Game design docs for the PANG game live under `docs/`:
+
+- [`docs/PRD.md`](docs/PRD.md) — overall product requirements: core concept, balloon/obstacle/item systems, difficulty, controls
+- [`docs/features/main.md`](docs/features/main.md) — main screen spec
+- [`docs/features/rules.md`](docs/features/rules.md) — game rules (win/lose conditions, controls, balloon/obstacle/item rules)
+- [`docs/features/mission.md`](docs/features/mission.md) — first stage (mission 1) spec
