@@ -1,14 +1,21 @@
 import { useEffect, useRef } from 'react'
-import { GAME_WIDTH, GAME_HEIGHT } from '../game/constants'
+import { GAME_WIDTH, GAME_HEIGHT, ITEM_DROP_CHANCE } from '../game/constants'
 import { attachInput, detachInput } from '../game/input'
 import { createGameLoop } from '../game/loop'
 import { createPlayer, updatePlayer, renderPlayer, damagePlayer } from '../game/entities/player'
-import { createHarpoonSystem, updateHarpoons, renderHarpoons } from '../game/entities/harpoon'
+import {
+  createHarpoonSystem,
+  updateHarpoons,
+  renderHarpoons,
+  applyRapidFire,
+} from '../game/entities/harpoon'
 import { createBalloon, updateBalloons, splitBalloon, renderBalloons } from '../game/entities/balloon'
 import { createObstacle, renderObstacle } from '../game/entities/obstacle'
+import { createItem, updateItems, renderItems, pickRandomItemType } from '../game/entities/item'
 import {
   harpoonHitsBalloon,
   playerHitsBalloon,
+  playerHitsItem,
   resolveBalloonObstacleCollision,
 } from '../game/systems/collision'
 import { MISSION_1 } from '../game/stages/mission1'
@@ -24,6 +31,7 @@ function GameCanvas() {
     const harpoonSystem = createHarpoonSystem()
     const obstacles = MISSION_1.obstacles.map(createObstacle)
     let balloons = MISSION_1.balloons.map(createBalloon)
+    let items = []
     let gameOver = false
     let cleared = false
     let remainingTime = MISSION_1.timeLimit
@@ -54,8 +62,23 @@ function GameCanvas() {
 
         harpoonSystem.harpoons.splice(hitIndex, 1)
         survivingBalloons.push(...splitBalloon(balloon))
+
+        if (Math.random() < ITEM_DROP_CHANCE) {
+          items.push(createItem({ x: balloon.x, y: balloon.y, type: pickRandomItemType() }))
+        }
       }
       balloons = survivingBalloons
+
+      items = updateItems(items, dt)
+
+      items = items.filter((item) => {
+        if (!playerHitsItem(player, item)) return true
+
+        if (item.type === 'extra-life') player.lives += 1
+        if (item.type === 'rapid-fire') applyRapidFire(harpoonSystem)
+
+        return false
+      })
 
       if (balloons.some((balloon) => playerHitsBalloon(player, balloon))) {
         damagePlayer(player)
@@ -78,6 +101,7 @@ function GameCanvas() {
       ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
       obstacles.forEach((obstacle) => renderObstacle(ctx, obstacle))
       renderBalloons(ctx, balloons)
+      renderItems(ctx, items)
       renderHarpoons(ctx, harpoonSystem)
       renderPlayer(ctx, player)
 

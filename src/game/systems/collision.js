@@ -1,4 +1,4 @@
-import { HARPOON_WIDTH, BALLOON_RADII } from '../constants'
+import { HARPOON_WIDTH, BALLOON_RADII, ITEM_SIZE } from '../constants'
 
 export function harpoonHitsBalloon(harpoon, balloon) {
   const radius = BALLOON_RADII[balloon.stage]
@@ -28,6 +28,20 @@ export function harpoonHitsObstacle(harpoon, obstacle) {
   const withinY = harpoon.y <= obstacle.y + obstacle.height && harpoon.y >= obstacle.y
 
   return withinX && withinY
+}
+
+export function playerHitsItem(player, item) {
+  const itemLeft = item.x - ITEM_SIZE / 2
+  const itemRight = item.x + ITEM_SIZE / 2
+  const itemTop = item.y - ITEM_SIZE / 2
+  const itemBottom = item.y + ITEM_SIZE / 2
+
+  return (
+    player.x < itemRight &&
+    player.x + player.width > itemLeft &&
+    player.y < itemBottom &&
+    player.y + player.height > itemTop
+  )
 }
 
 // 원의 바운딩 박스를 사각형으로 근사해 겹침이 가장 얕은 축으로 밀어내고 반사한다.
