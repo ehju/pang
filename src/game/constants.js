@@ -26,3 +26,5 @@ export const ITEM_FALL_SPEED = 60 // px per second
 
 export const RAPID_FIRE_DURATION = 6 // seconds
 export const HARPOON_COOLDOWN_RAPID = 0.1 // seconds
+
+export const SCORE_PER_HIT = [100, 150, 200] // 대, 중, 소

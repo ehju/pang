@@ -8,6 +8,7 @@ import {
 } from '../constants'
 import { isPressed } from '../input'
 import { harpoonHitsObstacle } from '../systems/collision'
+import { playFireSound } from '../audio'
 
 export function createHarpoonSystem() {
   return {
@@ -29,6 +30,7 @@ function spawnHarpoon(system, player) {
     startY: player.y,
   })
   system.cooldownRemaining = system.rapidFireRemaining > 0 ? HARPOON_COOLDOWN_RAPID : HARPOON_COOLDOWN
+  playFireSound()
 }
 
 export function updateHarpoons(system, player, obstacles, dt) {

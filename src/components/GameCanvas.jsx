@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { GAME_WIDTH, GAME_HEIGHT, ITEM_DROP_CHANCE } from '../game/constants'
+import { GAME_WIDTH, GAME_HEIGHT, ITEM_DROP_CHANCE, SCORE_PER_HIT } from '../game/constants'
 import { attachInput, detachInput } from '../game/input'
 import { createGameLoop } from '../game/loop'
 import { createPlayer, updatePlayer, renderPlayer, damagePlayer } from '../game/entities/player'
@@ -19,6 +19,14 @@ import {
   resolveBalloonObstacleCollision,
 } from '../game/systems/collision'
 import { MISSION_1 } from '../game/stages/mission1'
+import {
+  playPopSound,
+  playItemSound,
+  playGameOverSound,
+  playClearSound,
+  startBgm,
+  stopBgm,
+} from '../game/audio'
 
 function GameCanvas() {
   const canvasRef = useRef(null)
@@ -32,6 +40,7 @@ function GameCanvas() {
     const obstacles = MISSION_1.obstacles.map(createObstacle)
     let balloons = MISSION_1.balloons.map(createBalloon)
     let items = []
+    let score = 0
     let gameOver = false
     let cleared = false
     let remainingTime = MISSION_1.timeLimit
@@ -62,6 +71,8 @@ function GameCanvas() {
 
         harpoonSystem.harpoons.splice(hitIndex, 1)
         survivingBalloons.push(...splitBalloon(balloon))
+        score += SCORE_PER_HIT[balloon.stage]
+        playPopSound(balloon.stage)
 
         if (Math.random() < ITEM_DROP_CHANCE) {
           items.push(createItem({ x: balloon.x, y: balloon.y, type: pickRandomItemType() }))
@@ -76,6 +87,7 @@ function GameCanvas() {
 
         if (item.type === 'extra-life') player.lives += 1
         if (item.type === 'rapid-fire') applyRapidFire(harpoonSystem)
+        playItemSound()
 
         return false
       })
@@ -84,7 +96,10 @@ function GameCanvas() {
         damagePlayer(player)
       }
 
-      if (player.lives <= 0) gameOver = true
+      if (player.lives <= 0 && !gameOver) {
+        gameOver = true
+        playGameOverSound()
+      }
 
       remainingTime -= dt
       if (remainingTime <= 0) {
@@ -92,7 +107,10 @@ function GameCanvas() {
         remainingTime = MISSION_1.timeLimit
       }
 
-      if (balloons.length === 0) cleared = true
+      if (balloons.length === 0 && !cleared) {
+        cleared = true
+        playClearSound()
+      }
     }
 
     function render() {
@@ -107,24 +125,28 @@ function GameCanvas() {
 
       ctx.fillStyle = '#fff'
       ctx.font = '16px sans-serif'
-      ctx.fillText(`Lives: ${player.lives}`, 12, 24)
-      ctx.fillText(`Time: ${Math.ceil(remainingTime)}s`, 12, 46)
+      ctx.fillText(MISSION_1.name, 12, 24)
+      ctx.fillText(`Score: ${score}`, 12, 46)
+      ctx.fillText(`Lives: ${player.lives}`, 12, 68)
+      ctx.fillText(`Time: ${Math.ceil(remainingTime)}s`, 12, 90)
 
-      if (gameOver) {
-        ctx.fillStyle = '#f87171'
+      if (gameOver || cleared) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+
         ctx.font = 'bold 32px sans-serif'
         ctx.textAlign = 'center'
-        ctx.fillText('GAME OVER', GAME_WIDTH / 2, GAME_HEIGHT / 2)
-        ctx.textAlign = 'left'
-      } else if (cleared) {
-        ctx.fillStyle = '#4ade80'
-        ctx.font = 'bold 32px sans-serif'
-        ctx.textAlign = 'center'
-        ctx.fillText('STAGE CLEAR', GAME_WIDTH / 2, GAME_HEIGHT / 2)
+        ctx.fillStyle = gameOver ? '#f87171' : '#4ade80'
+        ctx.fillText(gameOver ? 'GAME OVER' : 'STAGE CLEAR', GAME_WIDTH / 2, GAME_HEIGHT / 2)
+
+        ctx.font = '20px sans-serif'
+        ctx.fillStyle = '#fff'
+        ctx.fillText(`Score: ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 36)
         ctx.textAlign = 'left'
       }
     }
 
+    startBgm()
     attachInput()
     const loop = createGameLoop({ update, render })
     loop.start()
@@ -132,6 +154,7 @@ function GameCanvas() {
     return () => {
       loop.stop()
       detachInput()
+      stopBgm()
     }
   }, [])
 

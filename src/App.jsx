@@ -1,15 +1,34 @@
 import { useState } from 'react'
 import GameCanvas from './components/GameCanvas'
 import MainScreen from './components/MainScreen'
+import { isMuted, setMuted } from './game/audio'
 
 function App() {
   const [screen, setScreen] = useState('main')
+  const [muted, setMutedState] = useState(isMuted())
 
-  if (screen === 'game') {
-    return <GameCanvas />
+  function toggleMute() {
+    const next = !muted
+    setMuted(next)
+    setMutedState(next)
   }
 
-  return <MainScreen onStart={() => setScreen('game')} />
+  return (
+    <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
+      <button
+        type="button"
+        onClick={toggleMute}
+        style={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
+      {screen === 'game' ? (
+        <GameCanvas />
+      ) : (
+        <MainScreen onStart={() => setScreen('game')} />
+      )}
+    </div>
+  )
 }
 
 export default App
