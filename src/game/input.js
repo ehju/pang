@@ -4,12 +4,14 @@ const KEY_MAP = {
   ArrowRight: 'right',
   KeyD: 'right',
   Space: 'fire',
+  Enter: 'pause',
 }
 
 const state = {
   left: false,
   right: false,
   fire: false,
+  pause: false,
 }
 
 function handleKeyDown(event) {
@@ -33,6 +35,7 @@ export function detachInput() {
   state.left = false
   state.right = false
   state.fire = false
+  state.pause = false
 }
 
 export function isPressed(action) {

@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { GAME_WIDTH, GAME_HEIGHT, ITEM_DROP_CHANCE, SCORE_PER_HIT } from '../game/constants'
-import { attachInput, detachInput } from '../game/input'
+import {
+  GAME_WIDTH,
+  GAME_HEIGHT,
+  ITEM_DROP_CHANCE,
+  SCORE_PER_HIT,
+  CLEAR_COUNTDOWN_DURATION,
+} from '../game/constants'
+import { attachInput, detachInput, isPressed } from '../game/input'
 import { createGameLoop } from '../game/loop'
 import { createPlayer, updatePlayer, renderPlayer, damagePlayer } from '../game/entities/player'
 import {
@@ -18,7 +24,7 @@ import {
   playerHitsItem,
   resolveBalloonObstacleCollision,
 } from '../game/systems/collision'
-import { MISSION_1 } from '../game/stages/mission1'
+import { getStage } from '../game/stages'
 import {
   playPopSound,
   playItemSound,
@@ -30,6 +36,7 @@ import {
 
 function GameCanvas({ onRestart, onExit }) {
   const canvasRef = useRef(null)
+  const advanceStageRef = useRef(() => {})
   const [status, setStatus] = useState('playing')
 
   useEffect(() => {
@@ -38,16 +45,50 @@ function GameCanvas({ onRestart, onExit }) {
 
     const player = createPlayer()
     const harpoonSystem = createHarpoonSystem()
-    const obstacles = MISSION_1.obstacles.map(createObstacle)
-    let balloons = MISSION_1.balloons.map(createBalloon)
+    let stageIndex = 0
+    let stage = null
+    let obstacles = []
+    let balloons = []
     let items = []
     let score = 0
     let gameOver = false
     let cleared = false
-    let remainingTime = MISSION_1.timeLimit
+    let remainingTime = 0
+    let clearCountdown = 0
+    let paused = false
+    let wasPausePressed = false
+
+    function loadStage(index) {
+      stageIndex = index
+      stage = getStage(index)
+      obstacles = stage.obstacles.map(createObstacle)
+      balloons = stage.balloons.map(createBalloon)
+      items = []
+      remainingTime = stage.timeLimit
+      cleared = false
+    }
+
+    function advanceStage() {
+      loadStage(stageIndex + 1)
+      setStatus('playing')
+    }
+    advanceStageRef.current = advanceStage
+
+    loadStage(0)
 
     function update(dt) {
-      if (gameOver || cleared) return
+      const pausePressed = isPressed('pause')
+      const pausePressedThisFrame = pausePressed && !wasPausePressed
+      wasPausePressed = pausePressed
+      if (pausePressedThisFrame && !gameOver && !cleared) paused = !paused
+
+      if (paused || gameOver) return
+
+      if (cleared) {
+        clearCountdown -= dt
+        if (clearCountdown <= 0) advanceStage()
+        return
+      }
 
       updatePlayer(player, dt)
       updateHarpoons(harpoonSystem, player, obstacles, dt)
@@ -105,12 +146,13 @@ function GameCanvas({ onRestart, onExit }) {
 
       remainingTime -= dt
       if (remainingTime <= 0) {
-        balloons.push(createBalloon(MISSION_1.timePenaltyBalloon))
-        remainingTime = MISSION_1.timeLimit
+        balloons.push(createBalloon(stage.timePenaltyBalloon))
+        remainingTime = stage.timeLimit
       }
 
       if (balloons.length === 0 && !cleared) {
         cleared = true
+        clearCountdown = CLEAR_COUNTDOWN_DURATION
         playClearSound()
         setStatus('cleared')
       }
@@ -128,7 +170,7 @@ function GameCanvas({ onRestart, onExit }) {
 
       ctx.fillStyle = '#fff'
       ctx.font = '16px sans-serif'
-      ctx.fillText(MISSION_1.name, 12, 24)
+      ctx.fillText(stage.name, 12, 24)
       ctx.fillText(`Score: ${score}`, 12, 46)
       ctx.fillText(`Lives: ${player.lives}`, 12, 68)
       ctx.fillText(`Time: ${Math.ceil(remainingTime)}s`, 12, 90)
@@ -145,6 +187,26 @@ function GameCanvas({ onRestart, onExit }) {
         ctx.font = '20px sans-serif'
         ctx.fillStyle = '#fff'
         ctx.fillText(`Score: ${score}`, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 36)
+
+        if (cleared) {
+          ctx.fillText(
+            `Next stage in ${Math.ceil(clearCountdown)}...`,
+            GAME_WIDTH / 2,
+            GAME_HEIGHT / 2 + 64,
+          )
+        }
+
+        ctx.textAlign = 'left'
+      }
+
+      if (paused) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+        ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+
+        ctx.font = 'bold 32px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = '#fff'
+        ctx.fillText('PAUSED', GAME_WIDTH / 2, GAME_HEIGHT / 2)
         ctx.textAlign = 'left'
       }
     }
@@ -171,6 +233,15 @@ function GameCanvas({ onRestart, onExit }) {
       />
       {status !== 'playing' && (
         <div style={{ textAlign: 'center', marginTop: 12 }}>
+          {status === 'cleared' && (
+            <button
+              type="button"
+              onClick={() => advanceStageRef.current()}
+              style={{ marginRight: 8 }}
+            >
+              다음 스테이지
+            </button>
+          )}
           <button type="button" onClick={onRestart} style={{ marginRight: 8 }}>
             다시하기
           </button>

@@ -27,3 +27,8 @@ export const RAPID_FIRE_DURATION = 6 // seconds
 export const HARPOON_COOLDOWN_RAPID = 0.1 // seconds
 
 export const SCORE_PER_HIT = [100, 150, 200] // 대, 중, 소
+
+export const STAGE_BALLOON_COUNT_STEP = 1 // 스테이지당 늘어나는 풍선 개수
+export const STAGE_SPEED_MULTIPLIER_STEP = 0.15 // 스테이지당 증가하는 속도 배율
+
+export const CLEAR_COUNTDOWN_DURATION = 3 // seconds before auto-advancing to next stage
