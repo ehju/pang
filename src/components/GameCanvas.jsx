@@ -11,18 +11,7 @@ import {
   playerHitsBalloon,
   resolveBalloonObstacleCollision,
 } from '../game/systems/collision'
-
-// TODO(Phase 5): 실제 스테이지 데이터에서 풍선을 스폰하도록 교체
-function createInitialBalloons() {
-  return [
-    createBalloon({ x: GAME_WIDTH / 2, y: 100, vx: 80, vy: 0, stage: 0 }),
-  ]
-}
-
-// TODO(Phase 5): 실제 스테이지 데이터에서 장애물을 배치하도록 교체
-function createInitialObstacles() {
-  return [createObstacle({ x: GAME_WIDTH / 2 - 80, y: 380, width: 160, height: 20 })]
-}
+import { MISSION_1 } from '../game/stages/mission1'
 
 function GameCanvas() {
   const canvasRef = useRef(null)
@@ -33,12 +22,13 @@ function GameCanvas() {
 
     const player = createPlayer()
     const harpoonSystem = createHarpoonSystem()
-    const obstacles = createInitialObstacles()
-    let balloons = createInitialBalloons()
+    const obstacles = MISSION_1.obstacles.map(createObstacle)
+    let balloons = MISSION_1.balloons.map(createBalloon)
     let gameOver = false
+    let cleared = false
 
     function update(dt) {
-      if (gameOver) return
+      if (gameOver || cleared) return
 
       updatePlayer(player, dt)
       updateHarpoons(harpoonSystem, player, obstacles, dt)
@@ -71,6 +61,7 @@ function GameCanvas() {
       }
 
       if (player.lives <= 0) gameOver = true
+      if (balloons.length === 0) cleared = true
     }
 
     function render() {
@@ -91,6 +82,12 @@ function GameCanvas() {
         ctx.font = 'bold 32px sans-serif'
         ctx.textAlign = 'center'
         ctx.fillText('GAME OVER', GAME_WIDTH / 2, GAME_HEIGHT / 2)
+        ctx.textAlign = 'left'
+      } else if (cleared) {
+        ctx.fillStyle = '#4ade80'
+        ctx.font = 'bold 32px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.fillText('STAGE CLEAR', GAME_WIDTH / 2, GAME_HEIGHT / 2)
         ctx.textAlign = 'left'
       }
     }
