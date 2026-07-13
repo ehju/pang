@@ -26,6 +26,7 @@ function GameCanvas() {
     let balloons = MISSION_1.balloons.map(createBalloon)
     let gameOver = false
     let cleared = false
+    let remainingTime = MISSION_1.timeLimit
 
     function update(dt) {
       if (gameOver || cleared) return
@@ -61,6 +62,13 @@ function GameCanvas() {
       }
 
       if (player.lives <= 0) gameOver = true
+
+      remainingTime -= dt
+      if (remainingTime <= 0) {
+        balloons.push(createBalloon(MISSION_1.timePenaltyBalloon))
+        remainingTime = MISSION_1.timeLimit
+      }
+
       if (balloons.length === 0) cleared = true
     }
 
@@ -76,6 +84,7 @@ function GameCanvas() {
       ctx.fillStyle = '#fff'
       ctx.font = '16px sans-serif'
       ctx.fillText(`Lives: ${player.lives}`, 12, 24)
+      ctx.fillText(`Time: ${Math.ceil(remainingTime)}s`, 12, 46)
 
       if (gameOver) {
         ctx.fillStyle = '#f87171'
