@@ -1,5 +1,6 @@
 import { HARPOON_WIDTH, HARPOON_SPEED, HARPOON_COOLDOWN, MAX_HARPOONS } from '../constants'
 import { isPressed } from '../input'
+import { harpoonHitsObstacle } from '../systems/collision'
 
 export function createHarpoonSystem() {
   return {
@@ -18,7 +19,7 @@ function spawnHarpoon(system, player) {
   system.cooldownRemaining = HARPOON_COOLDOWN
 }
 
-export function updateHarpoons(system, player, dt) {
+export function updateHarpoons(system, player, obstacles, dt) {
   const firePressed = isPressed('fire')
   const firePressedThisFrame = firePressed && !system.wasFirePressed
   system.wasFirePressed = firePressed
@@ -38,7 +39,17 @@ export function updateHarpoons(system, player, dt) {
     harpoon.x = player.x + player.width / 2 - HARPOON_WIDTH / 2
   }
 
-  system.harpoons = system.harpoons.filter((harpoon) => harpoon.y > 0)
+  system.harpoons = system.harpoons.filter((harpoon) => {
+    if (harpoon.y <= 0) return false
+
+    const blockingObstacle = obstacles.find((obstacle) => harpoonHitsObstacle(harpoon, obstacle))
+    if (blockingObstacle) {
+      harpoon.y = blockingObstacle.y + blockingObstacle.height
+      return false
+    }
+
+    return true
+  })
 }
 
 export function renderHarpoons(ctx, system) {

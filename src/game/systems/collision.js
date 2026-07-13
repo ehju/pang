@@ -21,3 +21,43 @@ export function playerHitsBalloon(player, balloon) {
 
   return dx * dx + dy * dy <= radius * radius
 }
+
+export function harpoonHitsObstacle(harpoon, obstacle) {
+  const withinX =
+    harpoon.x + HARPOON_WIDTH >= obstacle.x && harpoon.x <= obstacle.x + obstacle.width
+  const withinY = harpoon.y <= obstacle.y + obstacle.height && harpoon.y >= obstacle.y
+
+  return withinX && withinY
+}
+
+// 원의 바운딩 박스를 사각형으로 근사해 겹침이 가장 얕은 축으로 밀어내고 반사한다.
+export function resolveBalloonObstacleCollision(balloon, obstacle) {
+  const radius = BALLOON_RADII[balloon.stage]
+
+  const overlapLeft = balloon.x + radius - obstacle.x
+  const overlapRight = obstacle.x + obstacle.width - (balloon.x - radius)
+  const overlapTop = balloon.y + radius - obstacle.y
+  const overlapBottom = obstacle.y + obstacle.height - (balloon.y - radius)
+
+  if (overlapLeft <= 0 || overlapRight <= 0 || overlapTop <= 0 || overlapBottom <= 0) {
+    return false
+  }
+
+  const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom)
+
+  if (minOverlap === overlapTop) {
+    balloon.y = obstacle.y - radius
+    balloon.vy = -Math.abs(balloon.vy)
+  } else if (minOverlap === overlapBottom) {
+    balloon.y = obstacle.y + obstacle.height + radius
+    balloon.vy = Math.abs(balloon.vy)
+  } else if (minOverlap === overlapLeft) {
+    balloon.x = obstacle.x - radius
+    balloon.vx = -Math.abs(balloon.vx)
+  } else {
+    balloon.x = obstacle.x + obstacle.width + radius
+    balloon.vx = Math.abs(balloon.vx)
+  }
+
+  return true
+}
