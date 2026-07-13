@@ -4,6 +4,8 @@ import {
   PLAYER_WIDTH,
   PLAYER_HEIGHT,
   PLAYER_SPEED,
+  PLAYER_LIVES_INITIAL,
+  PLAYER_INVULNERABLE_TIME,
 } from '../constants'
 import { isPressed } from '../input'
 
@@ -13,19 +15,32 @@ export function createPlayer() {
     y: GROUND_Y - PLAYER_HEIGHT,
     width: PLAYER_WIDTH,
     height: PLAYER_HEIGHT,
+    lives: PLAYER_LIVES_INITIAL,
+    invulnerableRemaining: 0,
   }
 }
 
 export function updatePlayer(player, dt) {
+  if (player.invulnerableRemaining > 0) player.invulnerableRemaining -= dt
+
   if (isPressed('left')) player.x -= PLAYER_SPEED * dt
   if (isPressed('right')) player.x += PLAYER_SPEED * dt
 
   player.x = Math.max(0, Math.min(GAME_WIDTH - player.width, player.x))
 }
 
+export function damagePlayer(player) {
+  if (player.invulnerableRemaining > 0) return
+
+  player.lives -= 1
+  player.invulnerableRemaining = PLAYER_INVULNERABLE_TIME
+}
+
 export function renderPlayer(ctx, player) {
   const { x, y, width, height } = player
   const centerX = x + width / 2
+
+  ctx.globalAlpha = player.invulnerableRemaining > 0 ? 0.5 : 1
 
   const headRadius = width * 0.28
   const headCenterY = y + headRadius
@@ -70,4 +85,6 @@ export function renderPlayer(ctx, player) {
   ctx.beginPath()
   ctx.arc(centerX, headCenterY, headRadius, 0, Math.PI * 2)
   ctx.fill()
+
+  ctx.globalAlpha = 1
 }
