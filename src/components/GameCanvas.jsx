@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import PixelButton from './PixelButton'
 import {
   GAME_WIDTH,
   GAME_HEIGHT,
@@ -25,6 +26,7 @@ import {
   resolveBalloonObstacleCollision,
 } from '../game/systems/collision'
 import { getStage } from '../game/stages'
+import { renderBackground, pickRandomBackgroundTheme } from '../game/backgrounds'
 import {
   playPopSound,
   playItemSound,
@@ -57,11 +59,18 @@ function GameCanvas({ onRestart, onExit }) {
     let clearCountdown = 0
     let paused = false
     let wasPausePressed = false
+    let backgroundTheme = pickRandomBackgroundTheme()
 
     function loadStage(index) {
       stageIndex = index
       stage = getStage(index)
-      obstacles = stage.obstacles.map(createObstacle)
+      backgroundTheme = pickRandomBackgroundTheme()
+      obstacles = stage.obstacles.map((obstacleData) =>
+        createObstacle({
+          ...obstacleData,
+          x: Math.random() * (GAME_WIDTH - obstacleData.width),
+        }),
+      )
       balloons = stage.balloons.map(createBalloon)
       items = []
       remainingTime = stage.timeLimit
@@ -160,13 +169,15 @@ function GameCanvas({ onRestart, onExit }) {
 
     function render() {
       ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
-      ctx.fillStyle = '#111'
-      ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+      renderBackground(ctx, backgroundTheme)
       obstacles.forEach((obstacle) => renderObstacle(ctx, obstacle))
       renderBalloons(ctx, balloons)
       renderItems(ctx, items)
       renderHarpoons(ctx, harpoonSystem)
       renderPlayer(ctx, player)
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)'
+      ctx.fillRect(4, 4, 150, 96)
 
       ctx.fillStyle = '#fff'
       ctx.font = '16px sans-serif'
@@ -234,20 +245,14 @@ function GameCanvas({ onRestart, onExit }) {
       {status !== 'playing' && (
         <div style={{ textAlign: 'center', marginTop: 12 }}>
           {status === 'cleared' && (
-            <button
-              type="button"
-              onClick={() => advanceStageRef.current()}
-              style={{ marginRight: 8 }}
-            >
+            <PixelButton onClick={() => advanceStageRef.current()} style={{ marginRight: 8 }}>
               다음 스테이지
-            </button>
+            </PixelButton>
           )}
-          <button type="button" onClick={onRestart} style={{ marginRight: 8 }}>
+          <PixelButton onClick={onRestart} style={{ marginRight: 8 }}>
             다시하기
-          </button>
-          <button type="button" onClick={onExit}>
-            메인으로
-          </button>
+          </PixelButton>
+          <PixelButton onClick={onExit}>메인으로</PixelButton>
         </div>
       )}
     </div>

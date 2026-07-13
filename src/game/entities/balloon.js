@@ -7,10 +7,14 @@ import {
   BALLOON_SPLIT_VX,
 } from '../constants'
 
-const BALLOON_COLORS = ['#15803d', '#22c55e', '#86efac']
+const BALLOON_COLOR_PALETTE = ['#ef4444', '#3b82f6', '#a855f7', '#f97316', '#ec4899', '#14b8a6']
 
-export function createBalloon({ x, y, vx, vy, stage }) {
-  return { x, y, vx, vy, stage }
+function pickRandomBalloonColor() {
+  return BALLOON_COLOR_PALETTE[Math.floor(Math.random() * BALLOON_COLOR_PALETTE.length)]
+}
+
+export function createBalloon({ x, y, vx, vy, stage, color }) {
+  return { x, y, vx, vy, stage, color: color ?? pickRandomBalloonColor() }
 }
 
 export function updateBalloons(balloons, dt) {
@@ -50,6 +54,7 @@ export function splitBalloon(balloon) {
       vx: -BALLOON_SPLIT_VX,
       vy: BALLOON_SPLIT_VY,
       stage: nextStage,
+      color: balloon.color,
     }),
     createBalloon({
       x: balloon.x,
@@ -57,6 +62,7 @@ export function splitBalloon(balloon) {
       vx: BALLOON_SPLIT_VX,
       vy: BALLOON_SPLIT_VY,
       stage: nextStage,
+      color: balloon.color,
     }),
   ]
 }
@@ -64,7 +70,29 @@ export function splitBalloon(balloon) {
 export function renderBalloons(ctx, balloons) {
   for (const balloon of balloons) {
     const radius = BALLOON_RADII[balloon.stage]
-    ctx.fillStyle = BALLOON_COLORS[balloon.stage]
+
+    ctx.save()
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)'
+    ctx.shadowBlur = 8
+    ctx.shadowOffsetX = 3
+    ctx.shadowOffsetY = 5
+    ctx.fillStyle = balloon.color
+    ctx.beginPath()
+    ctx.arc(balloon.x, balloon.y, radius, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.restore()
+
+    const gloss = ctx.createRadialGradient(
+      balloon.x - radius * 0.35,
+      balloon.y - radius * 0.35,
+      radius * 0.05,
+      balloon.x - radius * 0.1,
+      balloon.y - radius * 0.1,
+      radius * 0.9,
+    )
+    gloss.addColorStop(0, 'rgba(255, 255, 255, 0.55)')
+    gloss.addColorStop(1, 'rgba(255, 255, 255, 0)')
+    ctx.fillStyle = gloss
     ctx.beginPath()
     ctx.arc(balloon.x, balloon.y, radius, 0, Math.PI * 2)
     ctx.fill()

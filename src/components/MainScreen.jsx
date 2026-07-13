@@ -2,6 +2,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../game/constants'
 import { initAudio } from '../game/audio'
 import PangIntroArt from './PangIntroArt'
 import PangTitle from './PangTitle'
+import PixelButton from './PixelButton'
 
 function MainScreen({ onStart }) {
   function handleStart() {
@@ -27,9 +28,7 @@ function MainScreen({ onStart }) {
     >
       <PangIntroArt />
       <PangTitle />
-      <button type="button" onClick={handleStart}>
-        시작하기
-      </button>
+      <PixelButton onClick={handleStart}>시작하기</PixelButton>
     </div>
   )
 }

@@ -30,3 +30,4 @@ Game design docs for the PANG game live under `docs/`:
 - [`docs/features/main.md`](docs/features/main.md) — main screen spec
 - [`docs/features/rules.md`](docs/features/rules.md) — game rules (win/lose conditions, controls, balloon/obstacle/item rules)
 - [`docs/features/mission.md`](docs/features/mission.md) — first stage (mission 1) spec
+- [`docs/visualRendering.md`](docs/visualRendering.md) — visual rendering style: colors, shapes, HUD, and planned polish

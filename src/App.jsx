@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import GameCanvas from './components/GameCanvas'
 import MainScreen from './components/MainScreen'
+import PixelButton from './components/PixelButton'
 import { isMuted, setMuted } from './game/audio'
 
 function App() {
@@ -24,13 +25,12 @@ function App() {
 
   return (
     <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
-      <button
-        type="button"
+      <PixelButton
         onClick={toggleMute}
-        style={{ position: 'absolute', top: 8, right: 8, zIndex: 10 }}
+        style={{ position: 'absolute', top: 8, right: 8, zIndex: 10, padding: '6px 10px' }}
       >
         {muted ? '🔇' : '🔊'}
-      </button>
+      </PixelButton>
       {screen === 'game' ? (
         <GameCanvas key={gameKey} onRestart={handleRestart} onExit={handleExit} />
       ) : (
