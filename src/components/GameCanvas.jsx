@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { GAME_WIDTH, GAME_HEIGHT, ITEM_DROP_CHANCE, SCORE_PER_HIT } from '../game/constants'
 import { attachInput, detachInput } from '../game/input'
 import { createGameLoop } from '../game/loop'
@@ -28,8 +28,9 @@ import {
   stopBgm,
 } from '../game/audio'
 
-function GameCanvas() {
+function GameCanvas({ onRestart, onExit }) {
   const canvasRef = useRef(null)
+  const [status, setStatus] = useState('playing')
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -99,6 +100,7 @@ function GameCanvas() {
       if (player.lives <= 0 && !gameOver) {
         gameOver = true
         playGameOverSound()
+        setStatus('gameOver')
       }
 
       remainingTime -= dt
@@ -110,6 +112,7 @@ function GameCanvas() {
       if (balloons.length === 0 && !cleared) {
         cleared = true
         playClearSound()
+        setStatus('cleared')
       }
     }
 
@@ -159,12 +162,24 @@ function GameCanvas() {
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={GAME_WIDTH}
-      height={GAME_HEIGHT}
-      style={{ display: 'block', margin: '0 auto', border: '1px solid #333' }}
-    />
+    <div>
+      <canvas
+        ref={canvasRef}
+        width={GAME_WIDTH}
+        height={GAME_HEIGHT}
+        style={{ display: 'block', margin: '0 auto', border: '1px solid #333' }}
+      />
+      {status !== 'playing' && (
+        <div style={{ textAlign: 'center', marginTop: 12 }}>
+          <button type="button" onClick={onRestart} style={{ marginRight: 8 }}>
+            다시하기
+          </button>
+          <button type="button" onClick={onExit}>
+            메인으로
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 

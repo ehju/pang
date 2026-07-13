@@ -5,12 +5,21 @@ import { isMuted, setMuted } from './game/audio'
 
 function App() {
   const [screen, setScreen] = useState('main')
+  const [gameKey, setGameKey] = useState(0)
   const [muted, setMutedState] = useState(isMuted())
 
   function toggleMute() {
     const next = !muted
     setMuted(next)
     setMutedState(next)
+  }
+
+  function handleRestart() {
+    setGameKey((key) => key + 1)
+  }
+
+  function handleExit() {
+    setScreen('main')
   }
 
   return (
@@ -23,7 +32,7 @@ function App() {
         {muted ? '🔇' : '🔊'}
       </button>
       {screen === 'game' ? (
-        <GameCanvas />
+        <GameCanvas key={gameKey} onRestart={handleRestart} onExit={handleExit} />
       ) : (
         <MainScreen onStart={() => setScreen('game')} />
       )}

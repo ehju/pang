@@ -1,4 +1,4 @@
-import { GROUND_Y, ITEM_SIZE, ITEM_LIFETIME, ITEM_FALL_SPEED } from '../constants'
+import { GROUND_Y, ITEM_SIZE, ITEM_FALL_SPEED } from '../constants'
 
 const ITEM_TYPES = ['extra-life', 'rapid-fire']
 const ITEM_COLORS = {
@@ -11,21 +11,15 @@ export function pickRandomItemType() {
 }
 
 export function createItem({ x, y, type }) {
-  return { x, y, type, timeRemaining: ITEM_LIFETIME }
+  return { x, y, type }
 }
 
 export function updateItems(items, dt) {
   for (const item of items) {
-    const landed = item.y + ITEM_SIZE >= GROUND_Y
-
-    if (landed) {
-      item.timeRemaining -= dt
-    } else {
-      item.y += ITEM_FALL_SPEED * dt
-    }
+    item.y += ITEM_FALL_SPEED * dt
   }
 
-  return items.filter((item) => item.timeRemaining > 0)
+  return items.filter((item) => item.y + ITEM_SIZE / 2 < GROUND_Y)
 }
 
 function drawHeart(ctx, cx, cy, size) {

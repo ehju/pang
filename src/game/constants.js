@@ -21,7 +21,6 @@ export const PLAYER_INVULNERABLE_TIME = 1.5 // seconds
 
 export const ITEM_SIZE = 16
 export const ITEM_DROP_CHANCE = 0.35
-export const ITEM_LIFETIME = 6 // seconds before an uncollected item vanishes
 export const ITEM_FALL_SPEED = 60 // px per second
 
 export const RAPID_FIRE_DURATION = 6 // seconds

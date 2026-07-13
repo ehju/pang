@@ -24,6 +24,9 @@ export function updateBalloons(balloons, dt) {
     if (balloon.y + radius >= GROUND_Y) {
       balloon.y = GROUND_Y - radius
       balloon.vy = -Math.abs(balloon.vy)
+    } else if (balloon.y - radius <= 0) {
+      balloon.y = radius
+      balloon.vy = Math.abs(balloon.vy)
     }
 
     if (balloon.x - radius <= 0) {
