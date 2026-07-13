@@ -1,16 +1,50 @@
-# React + Vite
+# PANG
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+풍선을 작살로 맞춰 크기별로 분열시키고, 모든 풍선을 제거해 스테이지를 클리어하는
+아케이드 게임 PANG의 웹(React + Vite) 재구현이다.
 
-Currently, two official plugins are available:
+## 실행 방법
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+```
 
-## React Compiler
+터미널에 출력되는 로컬 주소(기본값 `http://localhost:5173`)를 브라우저로 열면 된다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+그 외 명령어:
 
-## Expanding the Oxlint configuration
+- `npm run build` — 프로덕션 빌드 생성
+- `npm run preview` — 빌드 결과물을 로컬에서 미리보기
+- `npm run lint` — Oxlint로 코드 검사
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+별도의 테스트 러너는 구성되어 있지 않다.
+
+## 게임 방법
+
+메인 화면에서 "시작하기"를 누르면 첫 번째 스테이지(Mission 1)부터 진행된다.
+
+### 조작
+
+| 키 | 동작 |
+|---|---|
+| ← / → 또는 A / D | 좌우 이동 |
+| Space | 작살 발사 |
+| Enter | 일시정지 / 재개 |
+
+### 규칙
+
+- 화면 위쪽에서 떨어지는 풍선은 중력의 영향을 받아 바닥, 벽, 장애물에 부딪히며
+  튕긴다.
+- 작살로 풍선을 맞추면 터지는 대신 더 작은 풍선 2개로 분열한다 (대 → 중 → 소 →
+  소멸). 풍선에 몸이 닿으면 목숨을 하나 잃는다.
+- 벽돌 장애물은 작살로 파괴할 수 없으며, 작살은 장애물에 닿으면 멈추고, 풍선은
+  장애물에서 반사된다.
+- 풍선을 맞추면 확률적으로 아이템이 떨어진다. 하트는 목숨을 채워주고, 번개는
+  일정 시간 동안 작살 연사 속도를 올려준다. 아이템은 바닥에 닿는 즉시 사라진다.
+- 제한 시간 안에 스테이지를 클리어하지 못하면 풍선이 추가로 등장한다.
+- 화면의 풍선을 모두 제거하면 스테이지 클리어. 몇 초 카운트다운 후 자동으로
+  풍선 수와 속도가 늘어난 다음 스테이지로 넘어간다 (원치 않으면 "다음 스테이지"
+  버튼으로 바로 진행할 수 있다).
+- 목숨을 모두 잃으면 게임 오버. "다시하기"로 처음부터 다시 시작하거나 "메인으로"
+  버튼으로 메인 화면으로 돌아갈 수 있다.
