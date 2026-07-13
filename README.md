@@ -3,6 +3,10 @@
 풍선을 작살로 맞춰 크기별로 분열시키고, 모든 풍선을 제거해 스테이지를 클리어하는
 아케이드 게임 PANG의 웹(React + Vite) 재구현이다.
 
+| 메인 화면 | 게임 플레이 |
+|---|---|
+| ![메인 화면](docs/screenshots/main-screen.png) | ![게임 플레이](docs/screenshots/gameplay.png) |
+
 ## 실행 방법
 
 ```bash
